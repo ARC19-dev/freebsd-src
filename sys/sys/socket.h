@@ -45,7 +45,7 @@
  */
 
 /*
- * Data types.
+ * Data types
  */
 #if __BSD_VISIBLE
 #ifndef _GID_T_DECLARED
@@ -172,6 +172,7 @@ typedef	__uintptr_t	uintptr_t;
 #define	SO_TS_CLOCK	0x1017		/* clock type used for SO_TIMESTAMP */
 #define	SO_MAX_PACING_RATE	0x1018	/* socket's max TX pacing rate (Linux name) */
 #define	SO_DOMAIN	0x1019		/* get socket domain */
+#define SO_ARC		0x19		/* socket's ARC secure */
 #endif
 
 #if __BSD_VISIBLE
@@ -254,9 +255,10 @@ struct accept_filter_arg {
 #if __BSD_VISIBLE
 #define	AF_NATM		29		/* native ATM access */
 #define	AF_ATM		30		/* ATM */
-#define pseudo_AF_HDRCMPLT 31		/* Used by BPF to not rewrite headers
-					 * in interface output routine
-					 */
+#define pseudo_AF_HDRCMPLT 31		/* Used by BPF to not rewrite headers in interface output routine*/
+#ifdef __AS_ARC
+#define AF_ARC		19		/* */ 
+#endif
 #define	AF_NETGRAPH	32		/* Netgraph sockets */
 #define	AF_SLOW		33		/* 802.3ad slow protocol */
 #define	AF_SCLUSTER	34		/* Sitara cluster protocol */
@@ -328,8 +330,21 @@ struct accept_filter_arg {
 struct sockaddr {
 	unsigned char	sa_len;		/* total length */
 	sa_family_t	sa_family;	/* address family */
-	char		sa_data[14];	/* actually longer; address value */
+	u_char		sa_data[19];	/* actually longer; address value */
+#ifdef 	SO_ARC	
+	struct sockarc	*as_sec;	/* secure archive message */
+#endif
 };
+
+struct sockarc {
+	u_char scrypt[2];
+#ifdef __AS_ARC
+	unsigned char s_arc[19];
+#else
+	#error "Not __AS_ARC exist!"
+#endif
+};
+
 #if __BSD_VISIBLE
 #define	SOCK_MAXADDRLEN	255		/* longest possible addresses */
 
